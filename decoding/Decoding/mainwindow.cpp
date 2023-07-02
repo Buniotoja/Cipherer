@@ -18,7 +18,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::showException(QString e, int type)
+void MainWindow::showException(QString e, exceptionValue type)
 {
     QMessageBox::information(this, "Exception", e, QMessageBox::Ok);
     switch(type)
@@ -36,7 +36,7 @@ void MainWindow::readContent()
     QString path=QFileDialog::getOpenFileName(this, tr("Choose text file"), "/home");
     if(!path.endsWith(".txt"))
     {
-        showException("Incorrect text file extension.", 1);
+        showException("Incorrect text file extension.", contentVal);
     }
     QFile file(path);
     try{
@@ -44,7 +44,7 @@ void MainWindow::readContent()
     }catch(bool e){
         if(!e)
         {
-            showException("Text file did not be open correctly.", 1);
+            showException("Text file did not be open correctly.", contentVal);
         }
     }
     QTextStream stream(&file);
@@ -57,7 +57,7 @@ void MainWindow::readContent()
     file.close();
     if(content.isEmpty())
     {
-        showException("File content is empty.", 1);
+        showException("File content is empty.", contentVal);
     }
 }
 
@@ -67,7 +67,7 @@ void MainWindow::on_pictureButton_clicked()
     picturePath=QFileDialog::getOpenFileName(this, tr("Choose picture"), "/home");
     if(picturePath.isEmpty())
     {
-        showException("Picture choosen incorrectly.", 2);
+        showException("Picture choosen incorrectly.", pictureVal);
     }
 }
 
@@ -77,7 +77,7 @@ void MainWindow::on_confirmButton_clicked()
     password=ui->passwordEdit->toPlainText();
     if(password.isEmpty())
     {
-        showException("Password is empty.", 3);
+        showException("Password is empty.", passwordVal);
     }
 }
 //============================================ CONVERTIONS ===================================================
@@ -99,7 +99,7 @@ QString hexToBin(QString str, MainWindow obj)
         {
             if(!e)
             {
-                obj.showException("Cannot convert HexString to Integer", 0);
+                obj.showException("Cannot convert HexString to Integer", otherVal);
             }
         }
         result.append([&intOneByte]()->QString{
@@ -132,7 +132,7 @@ QString binToText(QString strBytes, MainWindow obj)
             }catch(bool e){
                 if(!e)
                 {
-                    obj.showException("Invalid convertion in function binToText", 0);
+                    obj.showException("Invalid convertion in function binToText", otherVal);
                 }
             }
             result.append((char)oneInt);
@@ -211,7 +211,7 @@ void MainWindow::on_decodeButton_clicked()
     // saving in temporary location
     if(textOutput.isEmpty())
     {
-        showException("Empty output.", 0);
+        showException("Empty output.", otherVal);
     }
     else
     {
@@ -222,7 +222,7 @@ void MainWindow::on_decodeButton_clicked()
         }catch(bool e){
             if(!e)
             {
-                showException("Destiny file did not be open correctly.", 0);
+                showException("Destiny file did not be open correctly.", otherVal);
             }
         }
         QTextStream stream(&outFile);

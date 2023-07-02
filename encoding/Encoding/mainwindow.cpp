@@ -20,7 +20,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::showException(QString e, int type)
+void MainWindow::showException(QString e, exceptionValue type)
 {
     QMessageBox::information(this, "Exception", e, QMessageBox::Ok);
     switch(type)
@@ -39,7 +39,7 @@ void MainWindow::on_textButton_clicked()
     QString path=QFileDialog::getOpenFileName(this, tr("Choose text file"), "/home");
     if(!path.endsWith(".txt"))
     {
-        showException("Incorrect text file extension.", 1);
+        showException("Incorrect text file extension.", contentVal);
     }
     QFile file(path);
     try{
@@ -47,13 +47,13 @@ void MainWindow::on_textButton_clicked()
     }catch(bool e){
         if(!e)
         {
-            showException("Text file did not be open correctly.", 1);
+            showException("Text file did not be open correctly.", contentVal);
         }
     }
     content=file.readAll();
     if(content.isEmpty())
     {
-        showException("File content is empty.", 1);
+        showException("File content is empty.", contentVal);
     }
     file.close();
 }
@@ -65,7 +65,7 @@ void MainWindow::on_pictureButton_clicked()
     if((picturePath.isEmpty()) || (!picturePath.endsWith(".jpg") && !picturePath.endsWith(".jpeg")
             && !picturePath.endsWith(".png") && !picturePath.endsWith(".bmp")))
     {
-        showException("Picture choosen incorrectly.", 2);
+        showException("Picture choosen incorrectly.", pictureVal);
     }
 
 }
@@ -76,7 +76,7 @@ void MainWindow::on_confirmButton_clicked()
     password=ui->passwordEdit->toPlainText();
     if(password.isEmpty())
     {
-        showException("Password is empty.", 3);
+        showException("Password is empty.", passwordVal);
     }
 }
 //============================================ CONVERTIONS ===================================================
@@ -116,7 +116,7 @@ QString binToHex(QString bytes, MainWindow obj)
             }catch(bool e){
                 if(!e)
                 {
-                    obj.showException("Invalid convertion in function binToHex", 0);
+                    obj.showException("Invalid convertion in function binToHex", otherVal);
                     break;
                 }
             }
@@ -170,7 +170,7 @@ void MainWindow::on_encodeButton_clicked()
     ciphering();
     if(textOutput.isEmpty())
     {
-        showException("Invalid cyphering.", 0);
+        showException("Invalid cyphering.", otherVal);
     }
 
     // pathes
@@ -192,13 +192,13 @@ void MainWindow::on_encodeButton_clicked()
     }catch(bool e){
         if(!e)
         {
-            showException("Did not open temporary binary file.", 0);
+            showException("Did not open temporary binary file.", otherVal);
         }
     }
     QTextStream stream(&tempFile);
     if(textOutput.isEmpty())
     {
-        showException("Empty output text.", 0);
+        showException("Empty output text.", otherVal);
     }
     else
     {
