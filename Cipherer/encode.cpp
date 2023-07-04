@@ -1,26 +1,27 @@
-#include "mainwindow.h"
-#include "ui_mainwindow.h"
+#include "encode.h"
+#include "ui_encode.h"
+#include "globalDef.h"
 #include <QMessageBox>
 #include <QFileDialog>
-#include <QDataStream>
+#include <QTextStream>
 #include <QByteArray>
 #include <QVector>
 #include <math.h>
 #include <QFileInfo>
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+Encode::Encode(QWidget *parent) :
+    QWidget(parent),
+    ui(new Ui::Encode)
 {
     ui->setupUi(this);
 }
 
-MainWindow::~MainWindow()
+Encode::~Encode()
 {
     delete ui;
 }
 
-void MainWindow::showException(QString e, exceptionValue type)
+void Encode::showException(QString e, exceptionValue type)
 {
     QMessageBox::information(this, "Exception", e, QMessageBox::Ok);
     switch(type)
@@ -34,7 +35,7 @@ void MainWindow::showException(QString e, exceptionValue type)
 //========================================== LOADING DATA =====================================================
 
 
-void MainWindow::on_textButton_clicked()
+void Encode::on_textButton_clicked()
 {
     QString path=QFileDialog::getOpenFileName(this, tr("Choose text file"), "/home");
     if(!path.endsWith(".txt"))
@@ -50,7 +51,13 @@ void MainWindow::on_textButton_clicked()
             showException("Text file did not be open correctly.", contentVal);
         }
     }
-    content=file.readAll();
+    QTextStream textStream(&file);
+    while(!textStream.atEnd())
+    {
+        QChar c;
+        textStream>>c;
+        content.append(c);
+    }
     if(content.isEmpty())
     {
         showException("File content is empty.", contentVal);
@@ -59,11 +66,11 @@ void MainWindow::on_textButton_clicked()
 }
 
 
-void MainWindow::on_pictureButton_clicked()
+void Encode::on_pictureButton_clicked()
 {
     picturePath=QFileDialog::getOpenFileName(this, tr("Choose picture"), "/home");
     if((picturePath.isEmpty()) || (!picturePath.endsWith(".jpg") && !picturePath.endsWith(".jpeg")
-            && !picturePath.endsWith(".png") && !picturePath.endsWith(".bmp")))
+                                    && !picturePath.endsWith(".png") && !picturePath.endsWith(".bmp")))
     {
         showException("Picture choosen incorrectly.", pictureVal);
     }
@@ -71,7 +78,7 @@ void MainWindow::on_pictureButton_clicked()
 }
 
 
-void MainWindow::on_confirmButton_clicked()
+void Encode::on_confirmButton_clicked()
 {
     password=ui->passwordEdit->toPlainText();
     if(password.isEmpty())
@@ -81,25 +88,7 @@ void MainWindow::on_confirmButton_clicked()
 }
 //============================================ CONVERTIONS ===================================================
 
-QString textToBin(QString str)
-{
-    QString result="";
-    for(int i=0; i<str.size(); i++)
-    {
-        int oneInt=(int)str.at(i).toLatin1();
-        result.append([&oneInt]()->QString{
-            QString nonFullByte=QString::number(oneInt, 2);
-            while(nonFullByte.size()<8)
-            {
-                nonFullByte='0'+nonFullByte;
-            }
-            return nonFullByte;
-        }());
-    }
-    return result;
-}
-
-QString binToHex(QString bytes, MainWindow obj)
+QString Encode::binToHex(QString bytes)
 {
     QString result="";
     QString oneByte="";
@@ -116,7 +105,7 @@ QString binToHex(QString bytes, MainWindow obj)
             }catch(bool e){
                 if(!e)
                 {
-                    obj.showException("Invalid convertion in function binToHex", otherVal);
+                    showException("Invalid convertion in function binToHex", otherVal);
                     break;
                 }
             }
@@ -159,13 +148,13 @@ QString xorTransformer(QString con, QString pass)
 
 //============================================ MANAGING ===================================================
 
-void MainWindow::ciphering()
+void Encode::ciphering()
 {
     QString binOutput=xorTransformer(textToBin(content), textToBin(password));
-    textOutput=binToHex(binOutput, this);
+    textOutput=binToHex(binOutput);
 }
 
-void MainWindow::on_encodeButton_clicked()
+void Encode::on_encodeButton_clicked()
 {
     ciphering();
     if(textOutput.isEmpty())
@@ -220,4 +209,3 @@ void MainWindow::on_encodeButton_clicked()
 
     delete[] sysPointer;
 }
-

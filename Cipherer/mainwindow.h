@@ -14,7 +14,6 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-    void excMW(QString exc);
 
 private slots:
 

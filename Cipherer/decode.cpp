@@ -1,24 +1,25 @@
-#include "mainwindow.h"
-#include "ui_mainwindow.h"
+#include "decode.h"
+#include "ui_decode.h"
+#include "globalDef.h"
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QTextStream>
 #include <QVector>
 #include <math.h>
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+Decode::Decode(QWidget *parent)
+    : QWidget(parent)
+    , ui(new Ui::Decode)
 {
     ui->setupUi(this);
 }
 
-MainWindow::~MainWindow()
+Decode::~Decode()
 {
     delete ui;
 }
 
-void MainWindow::showException(QString e, exceptionValue type)
+void Decode::showException(QString e, exceptionValue type)
 {
     QMessageBox::information(this, "Exception", e, QMessageBox::Ok);
     switch(type)
@@ -31,7 +32,7 @@ void MainWindow::showException(QString e, exceptionValue type)
 }
 //========================================== LOADING DATA =====================================================
 
-void MainWindow::readContent()
+void Decode::readContent()
 {
     QString path=QFileDialog::getOpenFileName(this, tr("Choose text file"), "/home");
     if(!path.endsWith(".txt"))
@@ -62,7 +63,7 @@ void MainWindow::readContent()
 }
 
 
-void MainWindow::on_pictureButton_clicked()
+void Decode::on_pictureButton_clicked()
 {
     picturePath=QFileDialog::getOpenFileName(this, tr("Choose picture"), "/home");
     if(picturePath.isEmpty())
@@ -72,7 +73,7 @@ void MainWindow::on_pictureButton_clicked()
 }
 
 
-void MainWindow::on_confirmButton_clicked()
+void Decode::on_confirmButton_clicked()
 {
     password=ui->passwordEdit->toPlainText();
     if(password.isEmpty())
@@ -82,7 +83,7 @@ void MainWindow::on_confirmButton_clicked()
 }
 //============================================ CONVERTIONS ===================================================
 
-QString hexToBin(QString str, MainWindow obj)
+QString Decode::hexToBin(QString str)
 {
     QString oneByte="";
     QString result="";
@@ -99,7 +100,7 @@ QString hexToBin(QString str, MainWindow obj)
         {
             if(!e)
             {
-                obj.showException("Cannot convert HexString to Integer", otherVal);
+                showException("Cannot convert HexString to Integer", otherVal);
             }
         }
         result.append([&intOneByte]()->QString{
@@ -115,7 +116,7 @@ QString hexToBin(QString str, MainWindow obj)
     return result;
 }
 
-QString binToText(QString strBytes, MainWindow obj)
+QString Decode::binToText(QString strBytes)
 {
     QString result="";
     QString oneByte="";
@@ -132,30 +133,12 @@ QString binToText(QString strBytes, MainWindow obj)
             }catch(bool e){
                 if(!e)
                 {
-                    obj.showException("Invalid convertion in function binToText", otherVal);
+                    showException("Invalid convertion in function binToText", otherVal);
                 }
             }
             result.append((char)oneInt);
             oneByte.clear();
         }
-    }
-    return result;
-}
-
-QString textToBin(QString str)
-{
-    QString result="";
-    for(int i=0; i<str.size(); i++)
-    {
-        int oneInt=(int)str.at(i).toLatin1();
-        result.append([&oneInt]()->QString{
-            QString nonFullByte=QString::number(oneInt, 2);
-            while(nonFullByte.size()<8)
-            {
-                nonFullByte='0'+nonFullByte;
-            }
-            return nonFullByte;
-        }());
     }
     return result;
 }
@@ -185,13 +168,13 @@ QString xorTransormer(QString con, QString pass)
 
 //============================================ MANAGING ===================================================
 
-void MainWindow::deciphering()
+void Decode::deciphering()
 {
-    QString binOutput=xorTransormer(hexToBin(content, this), textToBin(password));
-    textOutput=binToText(binOutput, this);
+    QString binOutput=xorTransormer(hexToBin(content), textToBin(password));
+    textOutput=binToText(binOutput);
 }
 
-void MainWindow::on_decodeButton_clicked()
+void Decode::on_decodeButton_clicked()
 {
     // pathes
     QString homePath="/home/bunio/Pulpit/";
